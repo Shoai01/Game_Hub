@@ -1,0 +1,330 @@
+/* ── Ludo Game Board Styles ── */
+
+.game-board-container {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.game-board-wrapper {
+  position: relative;
+}
+
+/* ── 15×15 Grid ── */
+.ludo-board {
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  grid-template-rows: repeat(15, 1fr);
+  width: min(540px, 90vw);
+  height: min(540px, 90vw);
+  border: 3px solid #333;
+  border-radius: 8px;
+  background-color: #FEFEFA;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* ── Base Cell (default) ── */
+.board-cell {
+  border: 0.5px solid #333;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* ── Yards (Quadrants) ── */
+.yard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border: 1px solid #333;
+}
+.yard-green { background-color: #0f9d58; padding: 24px; }
+.yard-yellow { background-color: #f4b400; padding: 24px; }
+.yard-blue { background-color: #4285f4; padding: 24px; }
+.yard-red { background-color: #db4437; padding: 24px; }
+
+.yard-inner {
+  background-color: #fff;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  padding: 12px;
+  gap: 12px;
+  box-sizing: border-box;
+  border: 1px solid #333;
+}
+
+.yard-slot {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  aspect-ratio: 1;
+  border: 1px solid #333;
+}
+.yard-slot-green { background-color: #0f9d58; }
+.yard-slot-yellow { background-color: #f4b400; }
+.yard-slot-blue { background-color: #4285f4; }
+.yard-slot-red { background-color: #db4437; }
+
+/* ── Path cells ── */
+.cell-path {
+  background-color: #fff;
+}
+
+/* ── Safe Cell Star Container ── */
+.cell-safe-star {
+  background-color: #ECEFF1 !important; /* Star cells have a very light grey background */
+}
+
+/* ── Home stretch coloring ── */
+.cell-home-green { background-color: #0f9d58 !important; border: 0.5px solid #333 !important; }
+.cell-home-yellow { background-color: #f4b400 !important; border: 0.5px solid #333 !important; }
+.cell-home-blue { background-color: #4285f4 !important; border: 0.5px solid #333 !important; }
+.cell-home-red { background-color: #db4437 !important; border: 0.5px solid #333 !important; }
+
+/* ── Center home ── */
+.center-home {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #FEFEFA;
+  box-sizing: border-box;
+  border: 1.5px solid #333;
+  overflow: hidden;
+}
+
+.center-triangle {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.center-triangle-green {
+  background-color: #0f9d58;
+  clip-path: polygon(0% 0%, 0% 100%, 50% 50%);
+}
+
+.center-triangle-yellow {
+  background-color: #f4b400;
+  clip-path: polygon(0% 0%, 100% 0%, 50% 50%);
+}
+
+.center-triangle-blue {
+  background-color: #4285f4;
+  clip-path: polygon(100% 0%, 100% 100%, 50% 50%);
+}
+
+.center-triangle-red {
+  background-color: #db4437;
+  clip-path: polygon(0% 100%, 100% 100%, 50% 50%);
+}
+
+/* ── Start cell indicators ── */
+.cell-start-green { background-color: #0f9d58 !important; }
+.cell-start-yellow { background-color: #f4b400 !important; }
+.cell-start-blue { background-color: #4285f4 !important; }
+.cell-start-red { background-color: #db4437 !important; }
+
+/* ── Token ── */
+.token {
+  width: 65%;
+  height: 65%;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.25),
+    inset 0 1px 3px rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: absolute;
+  z-index: 2;
+}
+
+.center-home .token {
+  position: relative !important;
+  width: 22px !important;
+  height: 22px !important;
+  margin: 1px;
+}
+
+.yard-slot .token {
+  position: relative !important;
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.token:hover {
+  transform: scale(1.2);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 0 1px 3px rgba(255, 255, 255, 0.5);
+}
+
+.token-red { background: radial-gradient(circle at 35% 35%, #FF8A80, #EF5350, #C62828); }
+.token-green { background: radial-gradient(circle at 35% 35%, #A5D6A7, #66BB6A, #2E7D32); }
+.token-yellow { background: radial-gradient(circle at 35% 35%, #FFEE58, #F9A825, #F57F17); }
+.token-blue { background: radial-gradient(circle at 35% 35%, #90CAF9, #42A5F5, #1565C0); }
+
+.token-movable {
+  animation: tokenPulse 1.2s ease-in-out infinite;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.token-in-base {
+  width: 55%;
+  height: 55%;
+}
+
+@keyframes tokenPulse {
+  0%, 100% {
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.25),
+      0 0 0 0 rgba(255, 255, 255, 0);
+  }
+  50% {
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.25),
+      0 0 0 6px rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* ── Multi-token stacking ── */
+.token-stack-0 { top: 15%; left: 15%; }
+.token-stack-1 { top: 15%; left: 45%; }
+.token-stack-2 { top: 45%; left: 15%; }
+.token-stack-3 { top: 45%; left: 45%; }
+
+/* ── Dice ── */
+.dice-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.dice {
+  width: 64px;
+  height: 64px;
+  background: #fff;
+  border: 2px solid #E0E0E0;
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  padding: 8px;
+  gap: 2px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.1s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.dice:hover:not(.dice-disabled) {
+  transform: scale(1.05);
+  border-color: #1B4F8A;
+}
+
+.dice-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dice-rolling {
+  animation: diceShake 0.5s ease-in-out;
+}
+
+@keyframes diceShake {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  10% { transform: rotate(-15deg) scale(1.1); }
+  20% { transform: rotate(15deg) scale(1.1); }
+  30% { transform: rotate(-10deg) scale(1.05); }
+  40% { transform: rotate(10deg) scale(1.05); }
+  50% { transform: rotate(-5deg) scale(1); }
+  60% { transform: rotate(5deg); }
+  70% { transform: rotate(-3deg); }
+  80% { transform: rotate(3deg); }
+  90% { transform: rotate(-1deg); }
+}
+
+.dice-dot {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.dice-dot-filled {
+  background-color: #333;
+}
+
+/* ── Game Side Panel ── */
+.game-side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 280px;
+  max-height: min(540px, 90vw);
+}
+
+/* ── Game Log ── */
+.game-log {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  padding: 12px;
+  background: #FAFBFC;
+  min-height: 200px;
+}
+
+.game-log-entry {
+  font-size: 0.78rem;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  line-height: 1.4;
+  color: #555;
+}
+
+.game-log-entry:last-child {
+  border-bottom: none;
+}
+
+.log-color-red { color: #C62828; }
+.log-color-green { color: #2E7D32; }
+.log-color-yellow { color: #F57F17; }
+.log-color-blue { color: #1565C0; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .game-board-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .game-side-panel {
+    width: 100%;
+    max-width: min(540px, 90vw);
+    max-height: 300px;
+  }
+}

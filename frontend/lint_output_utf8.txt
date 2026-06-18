@@ -1,0 +1,133 @@
+﻿
+D:\Game_Hub\gamehub\src\components\auth\RegisterForm.jsx
+  14:3  error  'Tooltip' is defined but never used  no-unused-vars
+
+D:\Game_Hub\gamehub\src\components\game\LudoBoard.jsx
+  8:3  error  'BASE_YARDS' is defined but never used  no-unused-vars
+
+D:\Game_Hub\gamehub\src\components\lobby\ChatPanel.jsx
+  23:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  21 |   // Load existing messages and subscribe to new ones
+  22 |   useEffect(() => {
+> 23 |     setMessages(chatService.getMessages(roomId));
+     |     ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  24 |
+  25 |     const unsubscribe = chatService.subscribe(roomId, (newMsg) => {
+  26 |       setMessages((prev) => [...prev, newMsg]);  react-hooks/set-state-in-effect
+
+D:\Game_Hub\gamehub\src\context\AuthContext.jsx
+  14:7   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  12 |     const stored = authService.getCurrentUser();
+  13 |     if (stored) {
+> 14 |       setUser(stored);
+     |       ^^^^^^^ Avoid calling setState() directly within an effect
+  15 |     }
+  16 |     setLoading(false);
+  17 |   }, []);  react-hooks/set-state-in-effect
+  54:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-refresh/only-export-components
+
+D:\Game_Hub\gamehub\src\engine\ludoEngine.js
+   10:35  error  'HOME_ENTRY' is defined but never used           no-unused-vars
+  150:9   error  'playerPath' is assigned a value but never used  no-unused-vars
+
+D:\Game_Hub\gamehub\src\pages\GameBoardPage.jsx
+   81:11  error    Error: Cannot access variable before it is declared
+
+`handleTokenClick` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+  79 |       if (moves.length === 1) {
+  80 |         setTimeout(() => {
+> 81 |           handleTokenClick(moves[0], newState);
+     |           ^^^^^^^^^^^^^^^^ `handleTokenClick` accessed before it is declared
+  82 |         }, 400);
+  83 |       }
+  84 |     } else {
+
+   88 |
+   89 |   // Handle token click
+>  90 |   const handleTokenClick = useCallback(
+      |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  91 |     (tokenId, stateOverride) => {
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  92 |       const state = stateOverride || gameState;
+      ΓÇª
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 123 |     [gameState, validMovesList, room, navigate, roomId]
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 124 |   );
+      | ^^^^^ `handleTokenClick` is declared here
+  125 |
+  126 |   if (loading || !gameState) {
+  127 |     return (  react-hooks/immutability
+   87:6   warning  React Hook useCallback has a missing dependency: 'handleTokenClick'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              react-hooks/exhaustive-deps
+   91:5   error    Compilation Skipped: Existing memoization could not be preserved
+
+React Compiler has skipped optimizing this component because the existing manual memoization could not be preserved. This value was memoized in source but not in compilation output.
+
+   89 |   // Handle token click
+   90 |   const handleTokenClick = useCallback(
+>  91 |     (tokenId, stateOverride) => {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  92 |       const state = stateOverride || gameState;
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>  93 |       if (!state || state.turnPhase !== 'MOVE') return;
+      ΓÇª
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 121 |       }
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 122 |     },
+      | ^^^^^^ Could not preserve existing memoization
+  123 |     [gameState, validMovesList, room, navigate, roomId]
+  124 |   );
+  125 |                                                                                                                                                    react-hooks/preserve-manual-memoization
+  100:32  error    'events' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        no-unused-vars
+
+D:\Game_Hub\gamehub\src\pages\LobbyPage.jsx
+  57:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  55 |
+  56 |   useEffect(() => {
+> 57 |     fetchRoom();
+     |     ^^^^^^^^^ Avoid calling setState() directly within an effect
+  58 |     // Poll for room updates every 2 seconds (simulates WebSocket)
+  59 |     const interval = setInterval(fetchRoom, 2000);
+  60 |     return () => clearInterval(interval);  react-hooks/set-state-in-effect
+
+D:\Game_Hub\gamehub\src\pages\ProfilePage.jsx
+  24:3  error  'Divider' is defined but never used  no-unused-vars
+
+D:\Game_Hub\gamehub\src\pages\ResultPage.jsx
+   1:10  error  'useEffect' is defined but never used  no-unused-vars
+  11:3   error  'Grid' is defined but never used       no-unused-vars
+  12:3   error  'Avatar' is defined but never used     no-unused-vars
+
+D:\Game_Hub\gamehub\src\services\authService.js
+   68:23  error  '_' is assigned a value but never used  no-unused-vars
+   94:23  error  '_' is assigned a value but never used  no-unused-vars
+  161:23  error  '_' is assigned a value but never used  no-unused-vars
+
+D:\Game_Hub\gamehub\src\services\gameService.js
+  102:31  error  '_' is assigned a value but never used  no-unused-vars
+
+Γ£û 20 problems (19 errors, 1 warning)
+
