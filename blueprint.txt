@@ -1,0 +1,376 @@
+GameHub
+Master Project Blueprint
+MVP — Version 1.0
+────────────────────────────────
+Document Type
+Project Blueprint
+Version
+1.0 (MVP)
+Platform
+Web Application
+Primary Game
+Ludo
+Max Players
+4
+Confidential — For Internal Use Only
+1. Project Overview
+GameHub is a browser-based multiplayer gaming platform that allows friends to create private rooms, invite others via a unique room code, and play games together in real time. Version 1 focuses on building a stable, scalable multiplayer foundation using Ludo as the single launch game to validate the core architecture and user experience.
+Version 1 Success Definition
+Four players can create an account, join a shared room, complete a full Ludo match, and view match results — with real-time synchronization throughout.
+1.1  Project Goals
+The MVP must deliver the following end-to-end user flow without issues:
+#
+Goal
+#
+Goal
+1
+User account registration
+2
+Secure login / logout
+3
+Create a game room
+4
+Share room code with friends
+5
+Join an existing room
+6
+Chat in the pre-game lobby
+7
+Play a complete Ludo match with 2–4 players
+8
+View match results and statistics
+1.2  Platform Scope
+Category
+Included (MVP)
+Excluded (Future)
+Platform
+Web Application
+Android / iOS App, Desktop App
+Devices
+Desktop, Laptop, Tablet, Mobile Browser
+Native mobile clients
+Games
+Ludo
+All additional games
+Matchmaking
+Private rooms only
+Public matchmaking
+Social
+Lobby & in-game chat
+Friends system, Voice chat
+Progression
+Basic match stats
+XP, Coins, Leaderboards, Achievements
+AI
+Human players only
+AI/Bot players, Spectator mode
+2. User Journey & Application Screens
+2.1  User Flow
+The complete user journey from landing to post-match is outlined below:
+Step
+Description
+Step 1
+Landing Page — User discovers the platform
+Step 2
+Register / Login — Account creation or authentication
+Step 3
+Dashboard — Central hub for room actions
+Step 4
+Create or Join Room — Initiate or enter a game session
+Step 5
+Lobby — Players gather; chat enabled; host controls start
+Step 6
+Players Ready — All participants confirm readiness
+Step 7
+Game Start — Ludo board initializes
+Step 8
+Play Ludo — Real-time gameplay
+Step 9
+Result Screen — Winner declared; stats displayed
+Step 10
+Return to Dashboard
+2.2  Application Screens
+#
+Screen
+Access Level
+1
+Landing Page
+Public
+2
+Login
+Public
+3
+Register
+Public
+4
+Dashboard
+Protected
+5
+Create Room
+Protected
+6
+Join Room
+Protected
+7
+Lobby
+Protected
+8
+Ludo Game Screen
+Protected
+9
+Result Screen
+Protected
+10
+Profile
+Protected
+3. MVP Feature Specifications
+3.1  Authentication
+User registration with email and password
+Secure login and logout
+Session management
+3.2  User Profile
+Username and default avatar
+Match statistics overview
+3.3  Room System
+Feature
+Details
+Room Capacity
+Minimum 2 players — Maximum 4 players
+Room Code
+Unique shareable code generated on room creation
+Room States
+Created → Waiting → Ready → In Game → Finished → Closed
+Host Privileges
+Create room, initiate match start
+Host Transfer
+Automatically reassigned to the longest-present player if host leaves before game starts
+3.4  Real-Time Multiplayer
+WebSocket-based real-time state synchronization
+Turn-based synchronization enforced server-side
+Reconnection support with a 60-second reservation window
+Abandoned player handling — match continues without disconnected player after timeout
+3.5  Gameplay — Ludo
+Full Ludo rule implementation
+Server-generated dice rolls (client display only)
+Server-validated token movements
+Server-determined winner
+3.6  Communication
+Lobby chat (pre-game)
+In-game chat
+3.7  Match Results
+Winner declaration
+Match duration
+Basic per-player statistics
+3.8  Features Excluded from MVP
+The following features are intentionally deferred to future versions:
+Social & Progression
+Friends System
+Voice Chat
+Achievements
+Coins & XP System
+Ranking System
+Leaderboards
+Tournaments
+Platform & Gameplay
+Public Matchmaking
+Multiple Games
+AI / Bot Players
+Spectator Mode
+Native Mobile Apps
+4. Game & Room Rules
+4.1  Room Rules
+Rule
+Definition
+Min. Players
+2
+Max. Players
+4
+Room States
+Created → Waiting → Ready → In Game → Finished → Closed
+Host Transfer
+Auto-transfers to longest-present player if host disconnects before game start
+4.2  Ludo Match Flow
+Step
+Description
+1. Lobby
+Players join and confirm readiness
+2. Game Start
+Board initialized; player colors assigned
+3. Turn Assignment
+Turn order determined at game start
+4. Dice Roll
+Server generates dice value; sent to client
+5. Token Move
+Player selects valid token; server validates move
+6. Next Turn
+Control passes to next player in sequence
+7. Winner
+First player to home all tokens wins
+8. Result Screen
+Match stats and winner displayed
+4.3  Disconnection Rules
+Scenario
+Behavior
+Before Match Starts
+Disconnected player is removed from room immediately
+During Match
+Seat is reserved for 60 seconds to allow reconnection
+Reconnect Window
+60 seconds
+Reconnect Success
+Player rejoins and resumes from current game state
+Reconnect Failure
+Player is marked as abandoned; match continues without them
+5. Technical Architecture
+5.1  System Architecture
+Architecture Stack
+Frontend (React)  ↔  REST API + WebSocket  ↔  Backend (FastAPI)  ↔  PostgreSQL
+Layer
+Technology & Responsibility
+Frontend
+React — Handles rendering and display logic only; no game logic
+Backend
+FastAPI (Python) — All game logic, validation, state management
+Real-Time
+WebSocket — Bidirectional events for game state, chat, and sync
+Database
+PostgreSQL — Persistent storage for users, rooms, matches, messages
+5.2  Core Data Models
+Entity
+Key Fields
+Notes
+Users
+User ID, Username, Email, Password (hashed), Avatar
+Primary identity record
+Rooms
+Room ID, Room Code, Host User ID, Status
+Tracks active sessions
+Room Players
+Room ID, User ID, Ready Status
+Junction table for room membership
+Matches
+Match ID, Winner, Duration, Created Date
+Historical records
+Messages
+Room ID, User ID, Message, Timestamp
+Lobby and in-game chat
+6. API & WebSocket Reference
+6.1  REST API Endpoints
+Module
+Endpoint / Action
+Description
+Authentication
+POST /register
+Create a new user account
+Authentication
+POST /login
+Authenticate and return session token
+Authentication
+POST /logout
+Invalidate user session
+Room
+POST /room/create
+Create a new game room
+Room
+POST /room/join
+Join an existing room by code
+Room
+POST /room/leave
+Exit a room
+Profile
+GET /profile
+Retrieve user profile and stats
+Profile
+PUT /profile
+Update username or avatar
+Match
+GET /match/history
+List past matches for the user
+Match
+GET /match/:id/result
+Get result details for a specific match
+6.2  WebSocket Events
+Category
+Event
+Triggered When
+Room
+ROOM_CREATED
+A new room is successfully created
+Room
+PLAYER_JOINED
+A player successfully joins the room
+Room
+PLAYER_LEFT
+A player leaves the room voluntarily
+Room
+ROOM_CLOSED
+Room is terminated by host or system
+Game
+GAME_STARTED
+Host initiates the match
+Game
+DICE_ROLLED
+A dice roll event is triggered
+Game
+TOKEN_MOVED
+A valid token movement is processed
+Game
+TURN_CHANGED
+Active turn passes to the next player
+Game
+GAME_FINISHED
+A player wins the match
+Chat
+CHAT_MESSAGE
+A message is sent in lobby or in-game
+Connection
+PLAYER_DISCONNECTED
+A player's WebSocket connection drops
+Connection
+PLAYER_RECONNECTED
+A player successfully reconnects within the window
+7. Development Roadmap
+Development is structured in five sequential phases, each building on the previous:
+Phase 1: Authentication
+User registration
+Login / logout
+Session management
+Phase 2: Room System
+Create room
+Join room via code
+Lobby screen
+Phase 3: Real-Time Communication
+WebSocket integration
+Player synchronization
+Lobby & in-game chat
+Phase 4: Ludo Gameplay
+Game board UI
+Dice logic (server-side)
+Token movement & validation
+Win condition & turn logic
+Phase 5: Profile & Match History
+Player statistics
+Match results screen
+Profile page
+8. Success Criteria
+Version 1 is considered complete and ready for user testing when all of the following criteria are satisfied:
+#
+Acceptance Criterion
+Status
+1
+Four players can join the same room simultaneously
+Pending
+2
+Real-time game state synchronization functions correctly across all clients
+Pending
+3
+A full Ludo match can be completed without errors
+Pending
+4
+The winner is correctly identified and recorded in the database
+Pending
+5
+Match results and statistics are displayed on the result screen
+Pending
+MVP Launch Gate
+All five acceptance criteria must pass QA before GameHub MVP is officially released for beta testing.

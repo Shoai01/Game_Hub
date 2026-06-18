@@ -1,0 +1,141 @@
+# Project Architecture & Structural Blueprint
+
+This document provides a comprehensive structural and technical blueprint of the **Edge Assistant** project. It serves as a guide for replicating this architecture in future projects.
+
+---
+
+## 1. Directory Structure
+
+The project is structured as a monorepo containing a **React (CRA/MUI) frontend** and a **multi-service FastAPI backend**.
+
+```
+utility/
+├── backend/                       # Multi-service Python backend
+│   ├── core/                      # Shared core module (database, config, auth, utils)
+│   │   ├── __init__.py
+│   │   ├── config.py              # Central Pydantic environment configuration
+│   │   ├── db.py                  # SQLAlchemy async engine & session management
+│   │   ├── deps.py                # FastAPI dependencies (auth, JWT, role checks)
+│   │   ├── email.py               # SMTP email client
+│   │   ├── gateway_client.py      # Client for external API integration
+│   │   ├── redis.py               # Redis client connection
+│   │   ├── security.py            # Password hashing & JWT token generators
+│   │   ├── service_access.py      # Role-to-service mapping & quota guard
+│   │   └── token_usage.py         # Token utilization tracking schemas & functions
+│   ├── auth_service/              # Service handling user auth & SSO
+│   ├── brd_service/               # Video processing & BRD doc generation service
+│   ├── proposal_service/          # Business proposal doc generator service
+│   ├── automation_service/        # General automation operations service
+│   ├── migration_service/         # RPA migration analysis service (UiPath, BP, AA)
+│   ├── csm_service/               # Customer Satisfaction Survey/OneDrive sync service
+│   ├── test_case_service/         # Test Case generation service
+│   ├── sdd_service/               # Solution Design Document generation service
+│   ├── code_review_service/       # Code review and audit service
+│   ├── MoM_service/               # Minutes of Meeting extraction service
+│   ├── ae_log_analyze/            # AutomationEdge log analyzer service
+│   ├── training_service/          # Training evaluation service
+│   ├── decryption_utility/        # Shared scripts/binaries for decrypting workflow files
+│   ├── migrations/                # Alembic database migrations folder
+│   ├── requirements_utf8.txt      # Central Python requirements file
+│   ├── Dockerfile                 # Slim production-grade backend image build
+│   └── run_all.bat                # Dev script to start all services locally
+│
+├── frontend/                      # React frontend
+│   ├── src/
+│   │   ├── components/            # Shared UI components (Sidebar, WelcomeScreen, dialogs)
+│   │   ├── context/               # React Contexts (AuthContext, ThemeContext)
+│   │   ├── layouts/               # High-level layouts (DashboardLayout)
+│   │   ├── pages/                 # Specific view pages representing each tool/service
+│   │   ├── utils/                 # Frontend helpers and formatters
+│   │   ├── App.jsx                # Router & Theme configuration entrypoint
+│   │   ├── index.js               # Application React DOM mount
+│   │   └── setupProxy.js          # Development API Router proxy (http-proxy-middleware)
+│   ├── nginx.conf                 # Production API Gateway & Static Server configuration
+│   ├── package.json               # Frontend dependencies & start scripts
+│   └── Dockerfile                 # Nginx-based React SPA production build
+│
+├── docker-compose.yml             # Orchestration for all services + PostgreSQL + Redis
+├── DB.md                          # Entity Relationship Diagrams & database references
+└── DEPLOYMENT.md                  # Comprehensive deployment instructions
+```
+
+---
+
+## 2. Key Architecture Patterns
+
+### A. Independent Microservices with a Shared Core
+* **The Problem:** Having multiple distinct features (BRD, Code Review, Migration, MoM) in one app can make deployment heavy and updates fragile.
+* **The Solution:** Each feature runs as an independent FastAPI sub-app on its own port. They do not import from one another.
+* **Shared Core:** To prevent duplicate code, a shared `core` folder contains standard utilities:
+  * Database engines (`core/db.py`)
+  * Security utilities (`core/security.py`)
+  * Quota middleware (`core/service_access.py`)
+  * Central configurations (`core/config.py`)
+
+### B. Development & Production Proxy Routing
+Rather than exposing dozens of ports to the internet or hardcoding backend URLs in React, the application routes all traffic through a single frontend gateway:
+* **In Development (`setupProxy.js`):** The Webpack Dev Server captures relative paths (e.g. `/api/auth`, `/api/brd`) and forwards them to the corresponding port (e.g. `:8000`, `:8001`) using `http-proxy-middleware`.
+* **In Production (`nginx.conf`):** An Nginx server acts as the API Gateway. It serves static React files and reverse-proxies API calls directly to internal Docker service addresses, keeping all backend container ports closed to the outside world.
+
+### C. Role-Based Access Control (RBAC) & Quota Guards
+Services define role permissions via the central `SERVICE_ROLES` dictionary. Before a user can perform an operation, two checks are performed via the `RequireService` FastAPI dependency:
+1. **Role Verification:** Does the user possess a role allowed to access the service (or are they an `admin`)?
+2. **Quota Check:** Has the user exceeded their allowed prompt token quota (calculated dynamically via the `token_usage` table)? If limits are hit, access is blocked with a `403 Forbidden` response.
+
+```python
+# core/service_access.py
+class RequireService(RequireRole):
+    async def __call__(self, current_user: User = Depends(...), db: AsyncSession = Depends(...)):
+        user = await super().__call__(current_user)
+        usage = await get_user_token_usage_totals(db, user.id)
+        quota = build_token_quota_summary(user, usage)
+        if quota["remaining_total_tokens"] <= 0:
+            raise HTTPException(status_code=403, detail="Token limit exceeded.")
+        return user
+```
+
+### D. Async Database Session Management
+Database communication uses **asynchronous SQLAlchemy** with PostgreSQL.
+* Sessions are created per-request via a generator dependency (`get_db`) yielding an `AsyncSession`.
+* Transactions use Python's `async with` block for safe commit and rollback cycles.
+
+### E. Server-Sent Events (SSE) for Long-Running Operations
+For tasks that take time (e.g., video processing, batch code auditing), normal HTTP requests would timeout. Instead, services use FastAPI's `StreamingResponse` to emit Server-Sent Events (`text/event-stream`):
+* The backend runs the work in a background thread or asynchronous task queue.
+* Progress logs and percentages are queued up.
+* The API streams real-time updates back to the UI, completing only when the document is ready for download.
+
+---
+
+## 3. Scaffolding Your Next Project (Step-by-Step)
+
+If you want to construct your next project in this exact shape, follow this roadmap:
+
+### Step 1: Initialize the Base Directory & Virtual Environment
+Create your project directory and set up a central Python virtual environment:
+```powershell
+mkdir MyProject
+cd MyProject
+python -m venv backend/.venv
+```
+
+### Step 2: Establish the Core Module
+In `backend/core/`, create:
+1. `config.py`: A Pydantic `BaseSettings` schema that reads from `.env` and defines configuration.
+2. `db.py`: Async engine configuration using `create_async_engine` and `async_sessionmaker`.
+3. `deps.py` & `security.py`: JWT generation, cookie/header extraction, and token decoding functions.
+
+### Step 3: Scaffold a Service
+For each backend sub-app:
+1. Create a sub-folder (e.g., `backend/my_feature_service/`).
+2. Add a `main.py` configuring a `FastAPI` instance and registering a router.
+3. Import dependencies from `core` (e.g., `from core.deps import get_current_user`).
+4. In the service startup hook (`@app.on_event("startup")`), ensure required local folders and databases are initialized.
+
+### Step 5: Add the Dev Runner Script
+Create a simple `run_all.bat` (Windows) or `run_all.sh` (Linux) to launch your services concurrently during development.
+
+### Step 6: Initialize Frontend Routing and Proxy
+1. Generate your React app in `frontend/`.
+2. Add `setupProxy.js` to `frontend/src/` to configure proxy rules mapping your API endpoints.
+3. Code all React API calls using relative URLs (e.g., `axios.post("/api/my-feature/run")`).
